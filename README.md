@@ -81,6 +81,45 @@ InlineText(
 )
 ```
 
+For advanced visual effects that go beyond standard text attributes, you can create custom drawing effects
+by conforming to the `TextRunEffect` protocol:
+
+```swift
+struct HighlightEffect: TextRunEffect {
+  var color: Color
+  var animationProgress: CGFloat
+
+  var animatableData: CGFloat {
+    get { animationProgress }
+    set { animationProgress = newValue }
+  }
+
+  func draw(run: Text.Layout.Run, in context: inout GraphicsContext) {
+    let bounds = run.typographicBounds.rect
+    let highlightRect = CGRect(
+      x: bounds.minX,
+      y: bounds.minY,
+      width: bounds.width * animationProgress,
+      height: bounds.height
+    )
+    context.fill(Path(highlightRect), with: .color(color.opacity(0.3)))
+  }
+}
+```
+
+Then use it with `EffectProperty` in your inline style:
+
+```swift
+InlineText(markdown: "This is **highlighted** text")
+  .textual.inlineStyle(
+    InlineStyle()
+      .strong(EffectProperty(HighlightEffect(
+        color: .yellow,
+        animationProgress: 1.0
+      )))
+  )
+```
+
 For structured content with headings, paragraphs, lists, code blocks, and tables, use `StructuredText`:
 
 ```swift
@@ -202,11 +241,11 @@ Here's a practical example, a custom heading style that adds a subtle underline 
 ```swift
 struct CustomHeadingStyle: StructuredText.HeadingStyle {
   private static let fontScales: [CGFloat] = [2, 1.5, 1.25, 1, 0.875, 0.85]
-  
+
   func makeBody(configuration: Configuration) -> some View {
     let headingLevel = min(configuration.headingLevel, 6)
     let fontScale = Self.fontScales[headingLevel - 1]
-    
+
     VStack(alignment: .leading, spacing: 0) {
       configuration.label
         .textual.fontScale(fontScale)

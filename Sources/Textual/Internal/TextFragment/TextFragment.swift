@@ -24,9 +24,14 @@ import SwiftUI
 //
 // TextFragment is used by InlineText and StructuredText (via BlockContent) to render
 // attributed content with inline attachments, links, and selection.
+//
+// TextualTextRenderer handles custom text run effects that are
+// applied through the TextProperty system. Effects are stored in AttributeContainer
+// and rendered during the text drawing phase.
 
 struct TextFragment<Content: AttributedStringProtocol>: View {
   @Environment(\.textEnvironment) private var textEnvironment
+  @Environment(\.animatableEffect) private var animatableEffect
   @State private var textBuilder: TextBuilder?
 
   private let content: Content
@@ -38,6 +43,7 @@ struct TextFragment<Content: AttributedStringProtocol>: View {
   var body: some View {
     text
       .customAttribute(TextFragmentAttribute())
+      .textRenderer(TextualTextRenderer(animatableEffect: animatableEffect))
       .onGeometryChange(for: CGSize?.self, of: \.textContainerSize) { size in
         guard let size, let textBuilder else { return }
         textBuilder.sizeChanged(size, environment: textEnvironment)

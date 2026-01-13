@@ -87,22 +87,10 @@ by conforming to the `TextRunEffect` protocol:
 ```swift
 struct HighlightEffect: TextRunEffect {
   var color: Color
-  var animationProgress: CGFloat
-
-  var animatableData: CGFloat {
-    get { animationProgress }
-    set { animationProgress = newValue }
-  }
 
   func draw(run: Text.Layout.Run, in context: inout GraphicsContext) {
     let bounds = run.typographicBounds.rect
-    let highlightRect = CGRect(
-      x: bounds.minX,
-      y: bounds.minY,
-      width: bounds.width * animationProgress,
-      height: bounds.height
-    )
-    context.fill(Path(highlightRect), with: .color(color.opacity(0.3)))
+    context.fill(Path(bounds), with: .color(color.opacity(0.3)))
   }
 }
 ```
@@ -113,12 +101,65 @@ Then use it with `EffectProperty` in your inline style:
 InlineText(markdown: "This is **highlighted** text")
   .textual.inlineStyle(
     InlineStyle()
-      .strong(EffectProperty(HighlightEffect(
-        color: .yellow,
-        animationProgress: 1.0
-      )))
+      .strong(EffectProperty(HighlightEffect(color: .yellow)))
   )
 ```
+
+#### Animating Text Effects
+
+To animate effect properties with SwiftUI animations, you need to use `AnimatableEffectMarker` as a placeholder
+in your inline style, then pass the actual animated effect through the `.textual.animatableEffect()` modifier.
+This two-step approach is required because effects stored in `AttributeContainer` cannot directly participate
+in SwiftUI's animation system due to type erasure.
+
+First, define your effect with `animatableData`:
+
+```swift
+struct AnimatedHighlightEffect: TextRunEffect {
+  var color: Color
+  var progress: CGFloat
+
+  var animatableData: CGFloat {
+    get { progress }
+    set { progress = newValue }
+  }
+
+  func draw(run: Text.Layout.Run, in context: inout GraphicsContext) {
+    let bounds = run.typographicBounds.rect
+    let highlightRect = CGRect(
+      x: bounds.minX,
+      y: bounds.minY,
+      width: bounds.width * progress,
+      height: bounds.height
+    )
+    context.fill(Path(highlightRect), with: .color(color.opacity(0.3)))
+  }
+}
+```
+
+Then use `AnimatableEffectMarker` in your style and provide the actual effect via the environment:
+
+```swift
+@State private var progress: CGFloat = 0
+
+InlineText(markdown: "This is **highlighted** text")
+  .textual.inlineStyle(
+    InlineStyle()
+      .strong(EffectProperty(AnimatableEffectMarker<AnimatedHighlightEffect>()))
+  )
+  .textual.animatableEffect(
+    AnimatedHighlightEffect(color: .yellow, progress: progress)
+  )
+  .onAppear {
+    withAnimation(.easeInOut(duration: 1)) {
+      progress = 1
+    }
+  }
+```
+
+The `AnimatableEffectMarker` marks which text runs should receive the effect, while
+`.textual.animatableEffect()` provides the actual effect instance that participates in SwiftUI's
+animation interpolation.
 
 For structured content with headings, paragraphs, lists, code blocks, and tables, use `StructuredText`:
 

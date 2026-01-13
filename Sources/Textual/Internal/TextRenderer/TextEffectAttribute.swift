@@ -36,7 +36,7 @@ extension AttributeScopes {
 }
 
 extension AttributeContainer {
-  var textualEffect: AnyTextRunEffect? {
+  public var textualEffect: AnyTextRunEffect? {
     get { self[TextEffectAttributeKey.self] }
     set { self[TextEffectAttributeKey.self] = newValue }
   }

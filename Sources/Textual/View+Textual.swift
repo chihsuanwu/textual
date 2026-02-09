@@ -157,6 +157,70 @@ extension TextualNamespace where Base: View {
     #endif
   }
 
+  /// Adds custom actions to the text selection menu.
+  ///
+  /// Use this modifier to extend the text selection menu with custom actions. Custom actions
+  /// appear alongside the standard Copy and Share actions when users select text.
+  ///
+  /// Example:
+  /// ```swift
+  /// StructuredText(markdown: content)
+  ///   .textual.textSelection(.enabled)
+  ///   .textual.textSelectionActions([
+  ///     TextSelectionAction(
+  ///       id: "translate",
+  ///       title: "Translate",
+  ///       systemImage: "translate"
+  ///     ) { selectedText in
+  ///       translateText(selectedText)
+  ///     }
+  ///   ])
+  /// ```
+  ///
+  /// - Parameter actions: An array of custom actions to add to the selection menu.
+  /// - Returns: A view with custom text selection actions configured.
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public func textSelectionActions(_ actions: [TextSelectionAction]) -> some View {
+    #if TEXTUAL_ENABLE_TEXT_SELECTION
+      base.environment(
+        \.textSelectionMenuConfiguration,
+        TextSelectionMenuConfiguration(customActions: actions)
+      )
+    #else
+      base
+    #endif
+  }
+
+  /// Configures the text selection menu with custom actions and positioning.
+  ///
+  /// Use this modifier for fine-grained control over the text selection menu, including
+  /// where custom actions appear relative to standard actions.
+  ///
+  /// Example:
+  /// ```swift
+  /// StructuredText(markdown: content)
+  ///   .textual.textSelection(.enabled)
+  ///   .textual.textSelectionMenu(
+  ///     TextSelectionMenuConfiguration(
+  ///       customActions: [highlightAction, searchAction],
+  ///       position: .before
+  ///     )
+  ///   )
+  /// ```
+  ///
+  /// - Parameter configuration: The menu configuration to apply.
+  /// - Returns: A view with the specified text selection menu configuration.
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public func textSelectionMenu(_ configuration: TextSelectionMenuConfiguration) -> some View {
+    #if TEXTUAL_ENABLE_TEXT_SELECTION
+      base.environment(\.textSelectionMenuConfiguration, configuration)
+    #else
+      base
+    #endif
+  }
+
   /// Sets the spacing used between table cells in ``StructuredText``.
   public func tableCellSpacing(
     horizontal: CGFloat? = nil,

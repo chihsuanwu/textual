@@ -107,10 +107,6 @@ extension InlineStyle {
   }
 }
 
-#Preview {
-  InlineTextDemo()
-}
-
 // MARK: - HighlightEffect
 
 /// An animated highlighter pen effect for text.
@@ -167,3 +163,6 @@ struct HighlightEffect: TextRunEffect {
   }
 }
 
+#Preview {
+  InlineTextDemo()
+}

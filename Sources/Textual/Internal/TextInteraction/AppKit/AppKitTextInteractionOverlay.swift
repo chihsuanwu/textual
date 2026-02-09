@@ -23,7 +23,8 @@
       NSTextInteractionView(
         model: model,
         exclusionRects: overflowFrames,
-        openURL: context.environment.openURL
+        openURL: context.environment.openURL,
+        menuConfiguration: context.environment.textSelectionMenuConfiguration
       )
     }
 
@@ -31,6 +32,7 @@
       nsView.model = model
       nsView.exclusionRects = overflowFrames
       nsView.openURL = context.environment.openURL
+      nsView.menuConfiguration = context.environment.textSelectionMenuConfiguration
     }
   }
 #endif

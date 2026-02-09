@@ -14,6 +14,7 @@
     var model: TextSelectionModel
     var exclusionRects: [CGRect]
     var openURL: OpenURLAction
+    var menuConfiguration: TextSelectionMenuConfiguration
 
     override var acceptsFirstResponder: Bool { true }
     override var isFlipped: Bool { true }
@@ -21,14 +22,19 @@
     private var dragStart: TextPosition?
     private var selectionAnchor: TextPosition?
 
+    // Store custom action handlers indexed by action ID
+    private var customActionHandlers: [String: (String) -> Void] = [:]
+
     init(
       model: TextSelectionModel,
       exclusionRects: [CGRect],
-      openURL: OpenURLAction
+      openURL: OpenURLAction,
+      menuConfiguration: TextSelectionMenuConfiguration
     ) {
       self.model = model
       self.exclusionRects = exclusionRects
       self.openURL = openURL
+      self.menuConfiguration = menuConfiguration
 
       super.init(frame: .zero)
       self.wantsLayer = false
@@ -188,6 +194,8 @@
         return contextMenu
       }
 
+      let selectedText = model.attributedText(in: selectedRange).string
+
       // Get the localized title for the share action
       let sharingPicker = NSSharingServicePicker(items: [])
       let shareActionTitle = sharingPicker.standardShareMenuItem.title
@@ -202,21 +210,73 @@
           NSLocalizedString("Copy", bundle: .main, comment: "")
         }
 
-      contextMenu.addItem(
-        .init(
-          title: shareActionTitle,
-          action: #selector(share(_:)),
-          keyEquivalent: ""
+      // Helper to add standard actions
+      let addStandardActions: () -> Void = {
+        contextMenu.addItem(
+          .init(
+            title: shareActionTitle,
+            action: #selector(self.share(_:)),
+            keyEquivalent: ""
+          )
         )
-      )
-      contextMenu.addItem(.separator())
-      contextMenu.addItem(
-        .init(
-          title: copyActionTitle,
-          action: #selector(copy(_:)),
-          keyEquivalent: ""
+        contextMenu.addItem(.separator())
+        contextMenu.addItem(
+          .init(
+            title: copyActionTitle,
+            action: #selector(self.copy(_:)),
+            keyEquivalent: ""
+          )
         )
-      )
+      }
+
+      // Helper to add custom actions
+      let addCustomActions: () -> Void = {
+        // Clear previous handlers
+        self.customActionHandlers.removeAll()
+
+        for action in self.menuConfiguration.customActions {
+          // Validate the action for the selected text
+          guard action.validator(selectedText) else {
+            continue
+          }
+
+          // Store the handler
+          self.customActionHandlers[action.id] = action.handler
+
+          // Create menu item
+          let menuItem = NSMenuItem(
+            title: action.title,
+            action: #selector(self.performCustomAction(_:)),
+            keyEquivalent: ""
+          )
+          menuItem.representedObject = action.id
+
+          // Add SF Symbol image if available (macOS 11+)
+          if let systemImage = action.systemImage {
+            if #available(macOS 11.0, *) {
+              menuItem.image = NSImage(systemSymbolName: systemImage, accessibilityDescription: nil)
+            }
+          }
+
+          contextMenu.addItem(menuItem)
+        }
+      }
+
+      // Add actions based on position
+      switch menuConfiguration.position {
+      case .before:
+        addCustomActions()
+        if !menuConfiguration.customActions.isEmpty {
+          contextMenu.addItem(.separator())
+        }
+        addStandardActions()
+      case .after:
+        addStandardActions()
+        if !menuConfiguration.customActions.isEmpty {
+          contextMenu.addItem(.separator())
+        }
+        addCustomActions()
+      }
 
       return contextMenu
     }
@@ -286,6 +346,18 @@
       let formatter = Formatter(attributedText)
       pasteboard.setString(formatter.plainText(), forType: .string)
       pasteboard.setString(formatter.html(), forType: .html)
+    }
+
+    @objc private func performCustomAction(_ sender: Any?) {
+      guard let menuItem = sender as? NSMenuItem,
+            let actionId = menuItem.representedObject as? String,
+            let handler = customActionHandlers[actionId],
+            let selectedRange = model.selectedRange else {
+        return
+      }
+
+      let selectedText = model.attributedText(in: selectedRange).string
+      handler(selectedText)
     }
   }
 

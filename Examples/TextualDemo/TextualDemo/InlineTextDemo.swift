@@ -78,8 +78,10 @@ struct HighlightEffectDemo: View {
 
   private func startAnimation() {
     progress = 0
-    withAnimation {
-      progress = 1
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+      withAnimation {
+        progress = 1
+      }
     }
   }
 }
@@ -97,10 +99,6 @@ extension InlineStyle {
       .strikethrough(.foregroundColor(.secondary))
       .link(.foregroundColor(.purple), .underlineStyle(.init(pattern: .dot)))
   }
-}
-
-#Preview {
-  InlineTextDemo()
 }
 
 // MARK: - HighlightEffect
@@ -159,3 +157,6 @@ struct HighlightEffect: TextRunEffect {
   }
 }
 
+#Preview {
+  InlineTextDemo()
+}

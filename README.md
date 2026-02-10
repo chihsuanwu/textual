@@ -105,7 +105,8 @@ InlineText(markdown: "This is **highlighted** text")
   )
 ```
 
-#### Animating Text Effects
+<details>
+<summary>Animating Text Effects</summary>
 
 To animate effect properties with SwiftUI animations, you need to use `AnimatableEffectMarker` as a placeholder
 in your inline style, then pass the actual animated effect through the `.textual.animatableEffect()` modifier.
@@ -160,6 +161,8 @@ InlineText(markdown: "This is **highlighted** text")
 The `AnimatableEffectMarker` marks which text runs should receive the effect, while
 `.textual.animatableEffect()` provides the actual effect instance that participates in SwiftUI's
 animation interpolation.
+
+</details>
 
 For structured content with headings, paragraphs, lists, code blocks, and tables, use `StructuredText`:
 

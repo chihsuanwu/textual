@@ -2,11 +2,14 @@ import SwiftUI
 
 // MARK: - Overview
 //
-// `TextEffectAttribute` marks text runs that should receive custom drawing effects.
+// `TextEffectAttribute` is a SwiftUI `TextAttribute` used to mark text runs that
+// should receive custom drawing effects during `Text` layout and rendering.
 //
 // When a `TextRunEffect` is applied through the `TextProperty` system, it is stored
-// in the `AttributeContainer` as a `TextEffectAttribute`. The `TextualTextRenderer`
-// reads this attribute to determine which runs need custom drawing.
+// in the `AttributeContainer` via `TextEffectAttributeKey` as an `AnyTextRunEffect`.
+// During `Text` construction, `TextBuilder` reads this stored effect and attaches
+// `TextEffectAttribute` to the `Text`. `TextualTextRenderer` then reads this attribute
+// to determine which runs need custom drawing.
 
 struct TextEffectAttribute: TextAttribute {
   let effect: AnyTextRunEffect

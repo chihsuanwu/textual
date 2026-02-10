@@ -61,19 +61,22 @@ struct AnimatableEffectMarkerAttribute: TextAttribute {
 ///   )
 ///   .textual.animatableEffect(HighlightEffect(progress: progress))
 /// ```
-public struct AnimatableEffectMarker<Effect: TextRunEffect>: TextRunEffect, AnimatableEffectMarkerProtocol {
+public struct AnimatableEffectMarker<Effect: TextRunEffect>: TextRunEffect {
   static var markerID: String {
-    String(describing: Effect.self)
-  }
-
-  var effectTypeID: String {
-    Self.markerID
+    String(reflecting: Effect.self)
   }
 
   public init() {}
 
   public func draw(run: Text.Layout.Run, in context: inout GraphicsContext) {
     // No-op - the actual drawing is done by TextualTextRenderer using the environment effect
+  }
+}
+
+// Internal conformance to AnimatableEffectMarkerProtocol
+extension AnimatableEffectMarker: AnimatableEffectMarkerProtocol {
+  var effectTypeID: String {
+    Self.markerID
   }
 }
 

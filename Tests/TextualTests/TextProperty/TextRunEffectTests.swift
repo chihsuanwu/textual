@@ -82,7 +82,10 @@ struct TextRunEffectTests {
     let marker = AnimatableEffectMarker<TestEffect>()
     let anyEffect = AnyTextRunEffect(marker)
 
-    #expect(anyEffect.animatableEffectMarkerID == "TestEffect")
+    // markerID uses String(reflecting:) which includes the full module path
+    let markerID = anyEffect.animatableEffectMarkerID
+    #expect(markerID != nil)
+    #expect(markerID?.contains("TestEffect") == true)
   }
 
   @Test func regularEffectReturnsNilMarkerID() {

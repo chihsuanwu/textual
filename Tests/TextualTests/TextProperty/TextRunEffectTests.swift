@@ -91,4 +91,23 @@ struct TextRunEffectTests {
 
     #expect(anyEffect.animatableEffectMarkerID == nil)
   }
+
+  @Test func attributedStringHasTextEffect() {
+    let effect = TestEffect(value: 1.0)
+
+    // String without effect
+    let plainString = AttributedString("Hello")
+    #expect(plainString.hasTextEffect == false)
+
+    // String with effect
+    var container = AttributeContainer()
+    container.textualEffect = AnyTextRunEffect(effect)
+    let styledString = AttributedString("World", attributes: container)
+    #expect(styledString.hasTextEffect == true)
+
+    // Combined string
+    var combined = plainString
+    combined.append(styledString)
+    #expect(combined.hasTextEffect == true)
+  }
 }

@@ -5,6 +5,7 @@ import Textual
 struct CustomTextSelectionDemo: View {
   @State private var showAlert = false
   @State private var alertMessage = ""
+  @State private var isTextSelected = false
 
   private let markdown = """
     # Custom Text Selection Demo
@@ -31,13 +32,15 @@ struct CustomTextSelectionDemo: View {
     ScrollView {
       StructuredText(markdown: markdown)
         .textual.textSelection(.enabled)
+        .textual.textSelectionState($isTextSelected)
         .textual.textSelectionActions(customActions)
         .padding()
     }
-    .alert("Action Triggered", isPresented: $showAlert) {
-      Button("OK") { }
-    } message: {
-      Text(alertMessage)
+    .overlay(alignment: .bottom) {
+      Button("Clear Selection") {
+        isTextSelected = false
+      }
+      .disabled(!isTextSelected)
     }
   }
 

@@ -157,6 +157,37 @@ extension TextualNamespace where Base: View {
     #endif
   }
 
+  /// Binds the text selection state to an external Boolean value.
+  ///
+  /// Use this modifier to observe whether text is currently selected, or to programmatically
+  /// clear the selection by setting the bound value to `false`.
+  ///
+  /// Example:
+  /// ```swift
+  /// @State private var isTextSelected = false
+  ///
+  /// StructuredText(markdown: content)
+  ///   .textual.textSelection(.enabled)
+  ///   .textual.textSelectionState($isTextSelected)
+  ///
+  /// Button("Clear Selection") {
+  ///   isTextSelected = false
+  /// }
+  /// .disabled(!isTextSelected)
+  /// ```
+  ///
+  /// - Parameter isSelected: A binding that reflects whether text is selected. Setting this
+  ///   to `false` clears the current selection.
+  @available(tvOS, unavailable)
+  @available(watchOS, unavailable)
+  public func textSelectionState(_ isSelected: Binding<Bool>) -> some View {
+    #if TEXTUAL_ENABLE_TEXT_SELECTION
+      base.environment(\.textSelectionStateBinding, isSelected)
+    #else
+      base
+    #endif
+  }
+
   /// Adds custom actions to the text selection menu.
   ///
   /// Use this modifier to extend the text selection menu with custom actions. Custom actions

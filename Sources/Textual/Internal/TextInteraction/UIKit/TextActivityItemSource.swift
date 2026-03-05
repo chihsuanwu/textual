@@ -20,7 +20,7 @@
       _ activityViewController: UIActivityViewController,
       itemForActivityType activityType: UIActivity.ActivityType?
     ) -> Any? {
-      NSItemProvider(object: transferableText)
+      transferableText.attributedString.string
     }
 
     func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController)
